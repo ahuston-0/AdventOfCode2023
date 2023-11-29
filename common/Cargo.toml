@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 log = "0.4.20"
+quit = "2.0.0"
 simple_logger = "4.3.0"
