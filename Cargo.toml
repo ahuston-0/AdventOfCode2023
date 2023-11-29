@@ -2,7 +2,6 @@
 resolver = "2"
 members = [
 	"common",
-	"template-day",
 	"day1",
 	"day2",
 	"day3",

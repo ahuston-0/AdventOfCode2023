@@ -7,7 +7,7 @@ printf "[workspace]\n" > "$WSCARGO"
 
 {
     printf "resolver = \"2\"\n"
-    printf "members = [\n\t\"common\",\n\t\"template-day\","
+    printf "members = [\n\t\"common\","
 } >> "$WSCARGO"
 
 # Create Cargo.toml for Workspace
