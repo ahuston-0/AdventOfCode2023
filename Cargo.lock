@@ -424,15 +424,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "template-day"
-version = "0.1.0"
-dependencies = [
- "common",
- "log",
- "simple_logger",
-]
-
-[[package]]
 name = "time"
 version = "0.3.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
