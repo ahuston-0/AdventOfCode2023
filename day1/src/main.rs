@@ -25,13 +25,12 @@ fn puzzle1() {
             .captures(&entry)
             .unwrap_or(re_one.captures(&entry).unwrap());
         let first = &captures[1];
-        let last;
 
-        if captures.get(2).is_none() {
-            last = first;
+        let last = if captures.get(2).is_none() {
+            first
         } else {
-            last = &captures[captures.len() - 1];
-        }
+            &captures[captures.len() - 1]
+        };
         let mut calibration = first.to_owned();
         calibration.push_str(last);
         let calint = calibration.parse::<u32>().unwrap();
@@ -59,19 +58,17 @@ fn puzzle2() {
         let entry = line.unwrap();
         let matches = long_find(&entry, &re);
         //let matches: Vec<_> = re.find_iter(&entry).map(|m| m.as_str()).collect();
-        let first: &str;
-        let last: &str;
-        if matches[0].len() == 1 {
-            first = matches[0];
+        let first = if matches[0].len() == 1 {
+            matches[0]
         } else {
-            first = str_to_digit(matches[0]);
-        }
+            str_to_digit(matches[0])
+        };
         let lasti = matches.len() - 1;
-        if matches[lasti].len() == 1 {
-            last = matches[lasti];
+        let last = if matches[lasti].len() == 1 {
+            matches[lasti]
         } else {
-            last = str_to_digit(matches[lasti]);
-        }
+            str_to_digit(matches[lasti])
+        };
         let mut calibration = first.to_owned();
         calibration.push_str(last);
         let calint = calibration.parse::<u32>().unwrap();
