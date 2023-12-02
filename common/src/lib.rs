@@ -16,7 +16,7 @@ pub fn init_logs() {
 
 pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<BufReader<File>>>
 where
-    P: AsRef<Path> + std::fmt::Debug + Copy ,
+    P: AsRef<Path> + std::fmt::Debug + Copy,
 {
     let file = File::open(filename)?;
     if file.metadata().unwrap().len() < 50 {

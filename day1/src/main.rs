@@ -33,7 +33,7 @@ fn puzzle1() {
             last = &captures[captures.len() - 1];
         }
         let mut calibration = first.to_owned();
-                           calibration.push_str( last);
+        calibration.push_str(last);
         let calint = calibration.parse::<u32>().unwrap();
 
         log::trace!("entry{entry}");
@@ -66,14 +66,14 @@ fn puzzle2() {
         } else {
             first = str_to_digit(matches[0]);
         }
-        let lasti = matches.len()-1;
+        let lasti = matches.len() - 1;
         if matches[lasti].len() == 1 {
             last = matches[lasti];
         } else {
             last = str_to_digit(matches[lasti]);
         }
         let mut calibration = first.to_owned();
-                           calibration.push_str( last);
+        calibration.push_str(last);
         let calint = calibration.parse::<u32>().unwrap();
 
         log::trace!("entry{entry}");
@@ -87,7 +87,6 @@ fn puzzle2() {
     log::info!("sum:{sum}");
 }
 
-
 fn str_to_digit(strmat: &str) -> &str {
     match strmat {
         "one" => "1",
@@ -100,16 +99,16 @@ fn str_to_digit(strmat: &str) -> &str {
         "eight" => "8",
         "nine" => "9",
         "zero" => "0",
-        _ => panic!("Input is not a string repr of a digit")
+        _ => panic!("Input is not a string repr of a digit"),
     }
 }
 
 // regex find_iter doesnt allow overlapping but the examples here have overlaps... time to do this the long way
-fn long_find<'a>(haystack: &'a str,re: &'a Regex) -> Vec<&'a str> {
+fn long_find<'a>(haystack: &'a str, re: &'a Regex) -> Vec<&'a str> {
     let mut matches: Vec<_> = vec![];
     for i in 0..haystack.len() {
-        if let Some(m) = re.find_at(haystack,i) {
-          matches.push(m.into());
+        if let Some(m) = re.find_at(haystack, i) {
+            matches.push(m.into());
         }
     }
     matches
