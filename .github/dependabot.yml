@@ -10,6 +10,6 @@ updates:
     schedule:
       interval: "weekly"
     allow:
-      dependency-type: "direct"
+      - dependency-type: "direct"
     assignees:
       - ahuston-0
