@@ -3,6 +3,7 @@ use fancy_regex::Regex;
 use itertools::Itertools;
 use std::path::PathBuf;
 
+// parts stored as row, column start, column end, part number
 type PartNum = (usize, usize, usize, String);
 fn main() {
     init_logs();
@@ -19,31 +20,34 @@ fn puzzle1() -> (Vec<String>, Vec<PartNum>) {
     let num = Regex::new(r"(\d+)").unwrap();
 
     let gridcheck = Regex::new(r"[^\d.]+").unwrap();
-    let mut sum = 0;
-    let mut valid_parts: Vec<PartNum> = vec![];
     for (i, line) in read_lines(input_path.as_path()).unwrap().enumerate() {
-        // Make below variable "entry" instead once starting the puzzle
-        // This is mostly to avoid clippy complaining x50
         let entry = line.unwrap();
+        // build grid
         grid.push(entry.clone());
 
-        for caps in num.captures_iter(grid[grid.len() - 1].as_str()) {
-            log::trace!("{:?}", caps);
-            let cap = caps.unwrap().get(1).unwrap();
-            possible.push((i, cap.start(), cap.end(), cap.as_str().to_string().clone()));
-        }
+        // build list of possible parts
+        num.captures_iter(grid.last().unwrap().as_str())
+            .for_each(|caps| {
+                log::trace!("{:?}", caps);
+                let cap = caps.unwrap().get(1).unwrap();
+                possible.push((i, cap.start(), cap.end(), cap.as_str().to_string().clone()));
+            });
     }
     log::trace!("{:?}", possible);
-    for p in possible {
-        if check_grid(&grid, &p, &gridcheck) {
-            sum += p.3.parse::<usize>().unwrap();
-            valid_parts.push(p);
-        }
-    }
+
+    // Get list of valid parts
+    let valid_parts: Vec<_> = possible
+        .iter()
+        .filter(|p| check_grid(&grid, p, &gridcheck))
+        .cloned()
+        .collect();
+
+    // Get solution
+    let sum: usize = valid_parts
+        .iter()
+        .map(|p| p.3.parse::<usize>().unwrap())
+        .sum();
     log::info!("sum:{}", sum);
-    // putting the answers here while i refactor
-    assert_eq!(sum, 544433);
-    valid_parts.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(&b.1)));
 
     (grid, valid_parts)
 }
@@ -72,6 +76,7 @@ fn check_grid(grid: &Vec<String>, pos: &PartNum, gridre: &Regex) -> bool {
     false
 }
 
+// stored as row, column
 type GearLoc = (usize, usize);
 
 fn puzzle2(grid: Vec<String>, valid_parts: Vec<PartNum>) {
@@ -92,7 +97,6 @@ fn puzzle2(grid: Vec<String>, valid_parts: Vec<PartNum>) {
         .sum();
 
     log::info!("gear ratios {}", prod);
-    assert_eq!(prod, 76314915);
 }
 
 type GearRatio = (GearLoc, PartNum, PartNum);
