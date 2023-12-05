@@ -1,6 +1,5 @@
 use rayon::prelude::*;
 use regex::{Captures, Regex};
-use std::collections::HashSet;
 use std::ops::Range;
 use std::path::PathBuf;
 
@@ -149,20 +148,23 @@ fn puzzle2() {
     let temp_humid = parse_map(&maps, &map_re);
     let maps = skip_map(&maps);
     let humid_loc = parse_map(&maps, &map_re);
-    log::error!("{:?}", seed_soil);
+    log::debug!("{:?}", seed_soil);
 
+    // doing this for all of the items (way too many)
     let seed_min: u64 = seeds
         .par_chunks(2)
-        .map(|chunk| {
+        .enumerate()
+        .map(|(idx, chunk)| { // expand (start, len) pairs from seed line into the full range
             let pair = chunk;
             log::trace!("{:?}", pair);
             let end = pair[0] + pair[1];
             let chunk: Vec<_> = (pair[0]..end).collect();
-            log::error!("chunk");
+            log::error!("chunk {idx}");
             chunk
         })
-        .flatten()
+        .flatten() // flatten because its a 2d array at this point
         .map(|seed| {
+            // Apply the maps to get from seed to location
             log::trace!("seed {seed}");
             let soil = map_seed(&seed, &seed_soil);
             log::trace!("soil {soil}");
@@ -181,7 +183,7 @@ fn puzzle2() {
             log::trace!("-----------------");
             loc
         })
-        .min()
+        .min() // get minimum seed location
         .unwrap();
 
     log::error!("min seed loc {:?}", seed_min);
