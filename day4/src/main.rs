@@ -81,12 +81,12 @@ fn puzzle2() {
                     log::debug!("id {}", caps.get(1).unwrap().as_str());
                     let winning: Vec<_> = parse_score_chunk(&caps, "winning");
                     let possible: Vec<_> = parse_score_chunk(&caps, "possible");
-                    let confirmed = possible.iter().filter(|d| winning.contains(&d)).count();
+                    let confirmed = possible.iter().filter(|d| winning.contains(d)).count();
                     log::debug!("confirmed {}", confirmed);
                     confirmed
                 })
                 .unwrap()
-        } as usize;
+        };
         let max_len = cmp::min(copies.iter().len() - i - 1, score);
         for j in i + 1..=i + max_len {
             copies[j] += copies[i];
