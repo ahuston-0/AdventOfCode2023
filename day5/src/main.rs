@@ -124,20 +124,7 @@ fn puzzle2() {
         .captures_iter(&input[0])
         .map(|d| d.get(1).unwrap().as_str().parse::<u64>().unwrap())
         .collect();
-    let seed_ranges: Vec<u64> = Vec::new();
     log::error!("num chunks {}", seeds.iter().len() / 2);
-    let seed_ranges: HashSet<_> = seeds
-        .par_chunks(2)
-        .map(|chunk| {
-            let pair = chunk;
-            log::trace!("{:?}", pair);
-            let end = pair[0] + pair[1];
-            let chunk: Vec<_> = (pair[0]..end).collect();
-
-            chunk
-        })
-        .collect();
-    log::error!("range {:?}", seed_ranges);
 
     log::info!("{:?}", seeds);
 
@@ -164,25 +151,38 @@ fn puzzle2() {
     let humid_loc = parse_map(&maps, &map_re);
     log::error!("{:?}", seed_soil);
 
-    let mut seed_locs: Vec<u64> = vec![];
-    seeds.iter().for_each(|seed| {
-        log::trace!("seed {seed}");
-        let soil = map_seed(seed, &seed_soil);
-        log::trace!("soil {soil}");
-        let fert = map_seed(&soil, &soil_fertilizer);
-        log::trace!("fert {fert}");
-        let water = map_seed(&fert, &fertilizer_water);
-        log::trace!("water {water}");
-        let light = map_seed(&water, &water_light);
-        log::trace!("light {light}");
-        let temp = map_seed(&light, &light_temp);
-        log::trace!("temp {temp}");
-        let humidity = map_seed(&temp, &temp_humid);
-        log::trace!("humidity {humidity}");
-        let loc = map_seed(&humidity, &humid_loc);
-        log::trace!("loc {loc}");
-        log::trace!("-----------------");
-        seed_locs.push(loc);
-    });
-    log::error!("min seed loc {:?}", seed_locs.iter().min().unwrap());
+    let seed_min: u64 = seeds
+        .par_chunks(2)
+        .map(|chunk| {
+            let pair = chunk;
+            log::trace!("{:?}", pair);
+            let end = pair[0] + pair[1];
+            let chunk: Vec<_> = (pair[0]..end).collect();
+            log::error!("chunk");
+            chunk
+        })
+        .flatten()
+        .map(|seed| {
+            log::trace!("seed {seed}");
+            let soil = map_seed(&seed, &seed_soil);
+            log::trace!("soil {soil}");
+            let fert = map_seed(&soil, &soil_fertilizer);
+            log::trace!("fert {fert}");
+            let water = map_seed(&fert, &fertilizer_water);
+            log::trace!("water {water}");
+            let light = map_seed(&water, &water_light);
+            log::trace!("light {light}");
+            let temp = map_seed(&light, &light_temp);
+            log::trace!("temp {temp}");
+            let humidity = map_seed(&temp, &temp_humid);
+            log::trace!("humidity {humidity}");
+            let loc = map_seed(&humidity, &humid_loc);
+            log::debug!("loc {loc}");
+            log::trace!("-----------------");
+            loc
+        })
+        .min()
+        .unwrap();
+
+    log::error!("min seed loc {:?}", seed_min);
 }
