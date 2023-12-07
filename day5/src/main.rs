@@ -69,7 +69,7 @@ fn puzzle1() {
     log::error!("min seed loc {:?}", seed_locs.iter().min().unwrap());
 }
 
-fn map_seed(seed: &u64, map: &Vec<SeedMap>) -> u64 {
+fn map_seed(seed: &u64, map: &[SeedMap]) -> u64 {
     let pos: Vec<_> = map.iter().filter(|soil| soil.src.contains(seed)).collect();
     if pos.iter().len() > 1 {
         panic!("why do we have two source ranges?")
@@ -82,7 +82,7 @@ fn map_seed(seed: &u64, map: &Vec<SeedMap>) -> u64 {
     pos[0].dest.start + offset
 }
 
-fn parse_map(maps: &Vec<&String>, map_re: &Regex) -> Vec<SeedMap> {
+fn parse_map(maps: &[&String], map_re: &Regex) -> Vec<SeedMap> {
     maps.iter()
         .skip(1)
         .take_while(|x| !x.contains("map"))
@@ -98,7 +98,7 @@ fn parse_map(maps: &Vec<&String>, map_re: &Regex) -> Vec<SeedMap> {
         })
         .collect()
 }
-fn skip_map<'a>(maps: &'a Vec<&'a String>) -> Vec<&'a String> {
+fn skip_map<'a>(maps: &'a [&'a String]) -> Vec<&'a String> {
     maps.iter()
         .cloned()
         .skip(1)
@@ -154,7 +154,8 @@ fn puzzle2() {
     let seed_min: u64 = seeds
         .par_chunks(2)
         .enumerate()
-        .map(|(idx, chunk)| { // expand (start, len) pairs from seed line into the full range
+        .map(|(idx, chunk)| {
+            // expand (start, len) pairs from seed line into the full range
             let pair = chunk;
             log::trace!("{:?}", pair);
             let end = pair[0] + pair[1];

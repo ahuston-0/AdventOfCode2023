@@ -19,8 +19,8 @@ where
     P: AsRef<Path> + std::fmt::Debug + Copy,
 {
     let file = File::open(filename)?;
-    if file.metadata().unwrap().len() < 50 {
-        log::error!("{:?} is less than 50 bytes, chances are you forgot to supply the input. Update the file and try again.", filename);
+    if file.metadata().unwrap().len() < 25 {
+        log::error!("{:?} is less than 25 bytes, chances are you forgot to supply the input. Update the file and try again.", filename);
         quit::with_code(1);
     }
 
