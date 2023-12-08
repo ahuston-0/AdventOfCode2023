@@ -16,13 +16,20 @@ pub fn init_logs() {
 
 pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<BufReader<File>>>
 where
-    P: AsRef<Path> + std::fmt::Debug + Copy ,
+    P: AsRef<Path> + std::fmt::Debug + Copy,
 {
     let file = File::open(filename)?;
-    if file.metadata().unwrap().len() < 50 {
-        log::error!("{:?} is less than 50 bytes, chances are you forgot to supply the input. Update the file and try again.", filename);
+    if file.metadata().unwrap().len() < 25 {
+        log::error!("{:?} is less than 25 bytes, chances are you forgot to supply the input. Update the file and try again.", filename);
         quit::with_code(1);
     }
 
     Ok(BufReader::new(file).lines())
+}
+
+pub mod prelude {
+    pub use regex::Regex;
+    pub use num::Integer;
+    pub use itertools::Itertools;
+    pub use rayon::prelude::*;
 }
