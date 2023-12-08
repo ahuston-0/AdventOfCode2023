@@ -10,3 +10,4 @@ log = "0.4.20"
 simple_logger = "4.3.0"
 common = {path = '../common'}
 regex = "1.10.2"
+num = "0.4.1"
