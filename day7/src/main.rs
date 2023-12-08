@@ -199,6 +199,10 @@ fn check_wins_p2(hand: Vec<Card>) -> Win {
         }
     });
 
+    if num_jokers == 5 {
+        return Win::FiveKind; // Force a return here, as below processing fails and returns Win::High for this edge case
+    }
+
     let mut hand_freq: Vec<_> = hand_freq.values().cloned().collect();
     hand_freq.sort_unstable();
 
