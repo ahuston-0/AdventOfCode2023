@@ -20,7 +20,10 @@ printf "\n]\n" >> "$WSCARGO"
 # Common files are created by hand, but the rest can be generated
 
 for i in $(seq 25); do
-    rm -rf "$SCRIPTDIR/day$i"
-    cp -r "$SCRIPTDIR/template-day" "$SCRIPTDIR/day$i"
-    sed -i 's/template-day/day'"$i"'/g' "$SCRIPTDIR/day$i/Cargo.toml"
+    if [ ! -d "$SCRIPTDIR/day$i" ]; then
+        cp -r "$SCRIPTDIR/template-day" "$SCRIPTDIR/day$i"
+        sed -i 's/template-day/day'"$i"'/g' "$SCRIPTDIR/day$i/Cargo.toml"
+    else
+        echo "$SCRIPTDIR/day$i exists, skipping..."
+    fi
 done
