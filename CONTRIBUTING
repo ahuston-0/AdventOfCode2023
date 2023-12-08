@@ -1,0 +1,5 @@
+Please do *not* include the generated directories as part of any PR, as that will be instantly rejected. The day directories may not be in the gitignore anymore, but they clutter the repository.
+
+Please verify all commits with a GPG or SSH key.
+
+Before submitting a PR ensure that your code compiles on both Nightly and the latest Stable toolchain.
