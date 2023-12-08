@@ -81,16 +81,17 @@ fn puzzle2(input_path: &Path) -> u64 {
         .filter(|node| node.ends_with('A'))
         .collect();
 
-    let mut current_instruction = 0;
 
     let mut cycles: Vec<u64> = Vec::new();
 
-    currents.iter().cloned().for_each(|c| {
-        let mut current = c;
+    currents.iter().for_each(|c| {
+        let mut current = *c;
         let mut num_steps = 0;
+        let mut current_instruction = 0;
         while !current.ends_with('Z') {
             let node = node_map.get(current).unwrap();
-            current = match directions.chars().nth(current_instruction).unwrap() {
+            let direction = directions.chars().nth(current_instruction).unwrap();
+            current = match direction {
                 'L' => node.0,
                 'R' => node.1,
 
