@@ -81,7 +81,6 @@ fn puzzle2(input_path: &Path) -> u64 {
         .filter(|node| node.ends_with('A'))
         .collect();
 
-
     let mut cycles: Vec<u64> = Vec::new();
 
     currents.iter().for_each(|c| {
