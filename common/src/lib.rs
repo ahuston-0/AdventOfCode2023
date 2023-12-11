@@ -28,8 +28,8 @@ where
 }
 
 pub mod prelude {
-    pub use regex::Regex;
-    pub use num::Integer;
     pub use itertools::Itertools;
+    pub use num::Integer;
     pub use rayon::prelude::*;
+    pub use regex::Regex;
 }
