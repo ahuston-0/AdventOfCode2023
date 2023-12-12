@@ -16,34 +16,7 @@ fn main() {
 }
 
 fn puzzle1(input_path: &Path) -> u64 {
-    let input: Vec<_> = read_lines(input_path)
-        .unwrap()
-        .map(|line| line.unwrap())
-        .collect();
-
-    // let input: Vec<_> = input.iter().map(|line| line.unwrap()).collect();
-
-    let mut galaxies = Vec::new();
-
-    input.iter().enumerate().for_each(|(idx, line)| {
-        for (i, c) in line.chars().enumerate() {
-            if c == '#' {
-                galaxies.push((idx as i64, i as i64));
-            }
-        }
-    });
-    let sum = galaxies
-        .iter()
-        .combinations(2)
-        .par_bridge()
-        .map(|set| {
-            let t = track(&input, *set[0], *set[1], 2);
-            log::trace!("{:?} to {:?}, {:?}", set[0], set[1], t);
-            t
-        })
-        .sum();
-    log::info!("sum {}", sum);
-    sum
+    harness(input_path,2)
 }
 
 type Node = (i64, i64);
@@ -93,13 +66,10 @@ fn is_void(map: &[String], dir: char, loc: usize) -> bool {
 }
 
 fn puzzle2(input_path: &Path) -> u64 {
-    let input: Vec<_> = read_lines(input_path)
-        .unwrap()
-        .map(|line| line.unwrap())
-        .collect();
+    harness(input_path,1000000)
+}
 
-    // let input: Vec<_> = input.iter().map(|line| line.unwrap()).collect();
-
+fn solve(input: &[String], jump: u64) -> u64 {
     let mut galaxies = Vec::new();
 
     input.iter().enumerate().for_each(|(idx, line)| {
@@ -114,13 +84,23 @@ fn puzzle2(input_path: &Path) -> u64 {
         .combinations(2)
         .par_bridge()
         .map(|set| {
-            let t = track(&input, *set[0], *set[1], 100000);
+            let t = track(&input, *set[0], *set[1], jump);
             log::trace!("{:?} to {:?}, {:?}", set[0], set[1], t);
             t
         })
         .sum();
     log::info!("sum {}", sum);
     sum
+}
+
+fn harness(input_path: &Path, jump: u64) -> u64 {
+    let input: Vec<_> = read_lines(input_path)
+        .unwrap()
+        .map(|line| line.unwrap())
+        .collect();
+
+    // let input: Vec<_> = input.iter().map(|line| line.unwrap()).collect();
+    solve(&input, jump)
 }
 
 #[cfg(test)]
@@ -133,5 +113,20 @@ mod tests {
         input_path.push("resources/test1");
         let result = puzzle1(&input_path);
         assert_eq!(result, 374);
+    }
+
+    #[test]
+    fn run_test_2() {
+        let mut input_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        input_path.push("resources/test1");
+        let result = harness(&input_path, 10);
+        assert_eq!(result, 1030);
+    }
+    #[test]
+    fn run_test_3() {
+        let mut input_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        input_path.push("resources/test1");
+        let result = harness(&input_path, 100);
+        assert_eq!(result, 8410);
     }
 }
