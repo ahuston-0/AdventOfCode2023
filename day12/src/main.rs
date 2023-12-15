@@ -47,7 +47,7 @@ fn puzzle1(input_path: &Path) -> u64 {
 
 #[memoize]
 fn get_num_groups(conditions: String, groups: Vec<usize>, prev_damaged: bool) -> usize {
-    if groups.is_empty() || groups == &[0] {
+    if groups.is_empty() || groups == [0] {
         return !conditions.contains('#') as usize;
     }
     if conditions.is_empty() {
@@ -84,16 +84,16 @@ fn get_num_groups(conditions: String, groups: Vec<usize>, prev_damaged: bool) ->
             } else if prev_damaged {
                 return 0;
             }
-            return get_num_groups(next_str.to_string(), groups, false);
+            get_num_groups(next_str.to_string(), groups, false)
         }
         ('?', true) => {
             if groups[0] != 0 {
                 let mut ngroups = groups.clone();
                 ngroups[0] -= 1;
-                return get_num_groups(next_str.to_string(), ngroups, true);
+                get_num_groups(next_str.to_string(), ngroups, true)
             } else {
                 let groups = groups.iter().cloned().skip(1).collect();
-                return get_num_groups(next_str.to_string(), groups, false);
+                get_num_groups(next_str.to_string(), groups, false)
             }
         }
         ('?', false) => {
@@ -104,7 +104,7 @@ fn get_num_groups(conditions: String, groups: Vec<usize>, prev_damaged: bool) ->
                 num_pos += get_num_groups(next_str.to_string(), ngroups.clone(), true)
             }
             num_pos += get_num_groups(next_str.to_string(), groups.clone(), false);
-            return num_pos;
+            num_pos
         }
         _ => panic!("invalid input"),
     }
@@ -135,7 +135,7 @@ fn puzzle2(input_path: &Path) -> u64 {
         for i in 0..5 {
             spring.push_str(conditions);
             if i != 4 {
-            spring.push_str("?");
+                spring.push('?');
             }
 
             spring_groups.extend(groups.clone());

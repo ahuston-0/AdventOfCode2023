@@ -16,7 +16,7 @@ fn main() {
 }
 
 fn puzzle1(input_path: &Path) -> u64 {
-    harness(input_path,2)
+    harness(input_path, 2)
 }
 
 type Node = (i64, i64);
@@ -66,7 +66,7 @@ fn is_void(map: &[String], dir: char, loc: usize) -> bool {
 }
 
 fn puzzle2(input_path: &Path) -> u64 {
-    harness(input_path,1000000)
+    harness(input_path, 1000000)
 }
 
 fn solve(input: &[String], jump: u64) -> u64 {
