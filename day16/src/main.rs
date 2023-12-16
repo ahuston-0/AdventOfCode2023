@@ -15,7 +15,7 @@ fn main() {
     puzzle2(&input_path);
 }
 
-#[derive(PartialEq, Copy, Clone, Debug)]
+#[derive(PartialEq, Copy, Clone, Debug, Ord, Eq, PartialOrd)]
 enum Direction {
     Right = 0,
     Up,
@@ -49,7 +49,7 @@ fn puzzle1(input_path: &Path) -> u64 {
 
     let visited = Vec::new();
     let path = trace_beam(&input, (0, -1), Direction::Right, &visited).unwrap();
-    let ans = path.iter().map(|(pos, _dir)| pos).sorted().dedup().count() + 1;
+    let ans = path.iter().map(|(pos, _dir)| pos).sorted().dedup().count();
     log::error!("{ans}");
     ans.try_into().unwrap()
 }
@@ -60,12 +60,12 @@ fn trace_beam(
     dir: Direction,
     visited: &[(Pos, Direction)],
 ) -> Option<Vec<(Pos, Direction)>> {
-    let mut visited: Vec<(Pos, Direction)> = visited.to_vec();
+    let mut visited: Vec<(Pos, Direction)> = visited.iter().cloned().sorted().dedup().collect_vec();
     let mut cpos = pos;
     let mut cdir = dir;
 
     loop {
-        log::info!("{:?} {:?}", cpos, cdir);
+        log::trace!("{:?} {:?}", cpos, cdir);
         // check_bounds retusn false if move would be bad
         if !check_bounds((map.len() as i64, map[0].len() as i64), cpos, cdir) {
             return Some(visited);
@@ -155,12 +155,64 @@ fn check_bounds(ends: Pos, pos: Pos, dir: Direction) -> bool {
 }
 
 fn puzzle2(input_path: &Path) -> u64 {
-    for line in read_lines(input_path).unwrap() {
-        // Make below variable "entry" instead once starting the puzzle
-        // This is mostly to avoid clippy complaining x50
-        let _entry = line.unwrap();
-    }
-    0
+    let input = read_lines(input_path)
+        .unwrap()
+        .map(|line| line.unwrap())
+        .collect_vec();
+
+    let visited = Vec::new();
+    let mut paths = vec![];
+
+    paths.par_extend((0..input.len()).into_par_iter().map(|i| {
+        trace_beam(&input, (i as i64, -1), Direction::Right, &visited)
+            .unwrap()
+            .iter()
+            .map(|(pos, _dir)| pos)
+            .sorted()
+            .dedup()
+            .count()
+    }));
+    paths.par_extend((0..input.len()).into_par_iter().map(|i| {
+        trace_beam(
+            &input,
+            (i as i64, input.len() as i64),
+            Direction::Left,
+            &visited,
+        )
+        .unwrap()
+        .iter()
+        .map(|(pos, _dir)| pos)
+        .sorted()
+        .dedup()
+        .count()
+    }));
+    paths.par_extend((0..input[0].len()).into_par_iter().map(|i| {
+        trace_beam(&input, (-1, i as i64), Direction::Down, &visited)
+            .unwrap()
+            .iter()
+            .map(|(pos, _dir)| pos)
+            .sorted()
+            .dedup()
+            .count()
+    }));
+    paths.par_extend((0..input[0].len()).into_par_iter().map(|i| {
+        trace_beam(
+            &input,
+            (input[0].len() as i64, i as i64),
+            Direction::Up,
+            &visited,
+        )
+        .unwrap()
+        .iter()
+        .map(|(pos, _dir)| pos)
+        .sorted()
+        .dedup()
+        .count()
+    }));
+
+    let ans = paths.iter().max().unwrap();
+    log::error!("{ans}");
+    (*ans).try_into().unwrap()
 }
 
 #[cfg(test)]
