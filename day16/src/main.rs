@@ -6,13 +6,16 @@ use common::{init_logs, read_lines};
 // currently: (regex::Regex, num::Integer, rayon::prelude, itertools::Itertools)
 use common::prelude::*;
 
+extern crate queues;
+use queues::*;
+
 fn main() {
     let mut input_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    input_path.push("resources/input");
+    input_path.push("resources/test1");
 
     init_logs();
     puzzle1(&input_path);
-    puzzle2(&input_path);
+    // puzzle2(&input_path);
 }
 
 #[derive(PartialEq, Copy, Clone, Debug, Ord, Eq, PartialOrd)]
@@ -48,7 +51,7 @@ fn puzzle1(input_path: &Path) -> u64 {
         .collect_vec();
 
     let visited = Vec::new();
-    let path = trace_beam(&input, (0, -1), Direction::Right, &visited).unwrap();
+    let path = trace_beam(&input, (0, -1), Direction::Right, &visited);
     let ans = path.iter().map(|(pos, _dir)| pos).sorted().dedup().count();
     log::error!("{ans}");
     ans.try_into().unwrap()
@@ -59,24 +62,25 @@ fn trace_beam(
     pos: Pos,
     dir: Direction,
     visited: &[(Pos, Direction)],
-) -> Option<Vec<(Pos, Direction)>> {
+) -> Vec<(Pos, Direction)> {
     let mut visited: Vec<(Pos, Direction)> = visited.iter().cloned().sorted().dedup().collect_vec();
-    let mut cpos = pos;
-    let mut cdir = dir;
-
-    loop {
-        log::trace!("{:?} {:?}", cpos, cdir);
+    let mut queue = queue![];
+    let _ = queue.add((pos, dir));
+    while queue.size() > 0 {
+        log::info!("{:?}", queue);
+        let (cpost, cdir) = queue.remove().unwrap();
         // check_bounds retusn false if move would be bad
-        if !check_bounds((map.len() as i64, map[0].len() as i64), cpos, cdir) {
-            return Some(visited);
+        if !check_bounds((map.len() as i64, map[0].len() as i64), cpost, cdir) {
+            continue;
         }
-        cpos = State {
-            pos: cpos,
+        let cpos = State {
+            pos: cpost,
             dir: cdir,
         }
         .move_state();
+        log::info!("{:?} {:?} {:?}", cpos, cdir, queue);
         if visited.contains(&(cpos, cdir)) {
-            return Some(visited); // all possible paths explores from here
+            continue; // all possible paths explores from here
         }
         visited.push((cpos, cdir));
         /*
@@ -87,55 +91,59 @@ fn trace_beam(
 
              */
         match map[cpos.0 as usize].chars().nth(cpos.1 as usize).unwrap() {
-            '.' => continue,
+            '.' => {
+                let _ = queue.add((cpos, cdir));
+            }
             '/' => match cdir {
-                Direction::Right => cdir = Direction::Up,
-                Direction::Left => cdir = Direction::Down,
-                Direction::Up => cdir = Direction::Right,
-                Direction::Down => cdir = Direction::Left,
+                Direction::Right => {
+                    let _ = queue.add((cpos, Direction::Up));
+                }
+                Direction::Left => {
+                    let _ = queue.add((cpos, Direction::Down));
+                }
+                Direction::Up => {
+                    let _ = queue.add((cpos, Direction::Right));
+                }
+                Direction::Down => {
+                    let _ = queue.add((cpos, Direction::Left));
+                }
             },
             '\\' => match cdir {
-                Direction::Right => cdir = Direction::Down,
-                Direction::Left => cdir = Direction::Up,
-                Direction::Up => cdir = Direction::Left,
-                Direction::Down => cdir = Direction::Right,
+                Direction::Right => {
+                    let _ = queue.add((cpos, Direction::Down));
+                }
+                Direction::Left => {
+                    let _ = queue.add((cpos, Direction::Up));
+                }
+                Direction::Up => {
+                    let _ = queue.add((cpos, Direction::Left));
+                }
+                Direction::Down => {
+                    let _ = queue.add((cpos, Direction::Right));
+                }
             },
             '|' => match cdir {
-                Direction::Up | Direction::Down => continue,
+                Direction::Up | Direction::Down => {
+                    let _ = queue.add((cpos, cdir));
+                }
                 Direction::Left | Direction::Right => {
-                    let up = trace_beam(map, cpos, Direction::Up, &visited);
-                    match up {
-                        Some(mut v) => visited.append(&mut v),
-                        _ => panic!("aa"),
-                    }
-
-                    let down = trace_beam(map, cpos, Direction::Down, &visited);
-                    match down {
-                        Some(mut v) => visited.append(&mut v),
-                        _ => panic!("aaa"),
-                    }
-                    return Some(visited);
+                    let _ = queue.add((cpos, Direction::Up));
+                    let _ = queue.add((cpos, Direction::Down));
                 }
             },
             '-' => match cdir {
-                Direction::Right | Direction::Left => continue,
+                Direction::Right | Direction::Left => {
+                    let _ = queue.add((cpos, cdir));
+                }
                 Direction::Up | Direction::Down => {
-                    let left = trace_beam(map, cpos, Direction::Left, &visited);
-                    match left {
-                        Some(mut v) => visited.append(&mut v),
-                        _ => continue,
-                    }
-                    let right = trace_beam(map, cpos, Direction::Right, &visited);
-                    match right {
-                        Some(mut v) => visited.append(&mut v),
-                        _ => continue,
-                    }
-                    return Some(visited);
+                    let _ = queue.add((cpos, Direction::Left));
+                    let _ = queue.add((cpos, Direction::Right));
                 }
             },
             _ => panic!("invalid board"),
         }
     }
+    visited
 }
 
 fn check_bounds(ends: Pos, pos: Pos, dir: Direction) -> bool {
@@ -165,7 +173,6 @@ fn puzzle2(input_path: &Path) -> u64 {
 
     paths.par_extend((0..input.len()).into_par_iter().map(|i| {
         trace_beam(&input, (i as i64, -1), Direction::Right, &visited)
-            .unwrap()
             .iter()
             .map(|(pos, _dir)| pos)
             .sorted()
@@ -179,7 +186,6 @@ fn puzzle2(input_path: &Path) -> u64 {
             Direction::Left,
             &visited,
         )
-        .unwrap()
         .iter()
         .map(|(pos, _dir)| pos)
         .sorted()
@@ -188,7 +194,6 @@ fn puzzle2(input_path: &Path) -> u64 {
     }));
     paths.par_extend((0..input[0].len()).into_par_iter().map(|i| {
         trace_beam(&input, (-1, i as i64), Direction::Down, &visited)
-            .unwrap()
             .iter()
             .map(|(pos, _dir)| pos)
             .sorted()
@@ -202,7 +207,6 @@ fn puzzle2(input_path: &Path) -> u64 {
             Direction::Up,
             &visited,
         )
-        .unwrap()
         .iter()
         .map(|(pos, _dir)| pos)
         .sorted()

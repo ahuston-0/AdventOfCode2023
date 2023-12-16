@@ -9,3 +9,4 @@ edition = "2021"
 log = "0.4.20"
 simple_logger = "4.3.0"
 common = {path = '../common'}
+queues = "1.1.0"
