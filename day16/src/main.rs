@@ -11,11 +11,11 @@ use queues::*;
 
 fn main() {
     let mut input_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    input_path.push("resources/test1");
+    input_path.push("resources/input");
 
     init_logs();
     puzzle1(&input_path);
-    // puzzle2(&input_path);
+    puzzle2(&input_path);
 }
 
 #[derive(PartialEq, Copy, Clone, Debug, Ord, Eq, PartialOrd)]
