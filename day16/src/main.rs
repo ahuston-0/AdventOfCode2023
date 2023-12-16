@@ -230,4 +230,11 @@ mod tests {
         let result = puzzle1(&input_path);
         assert_eq!(result, 46);
     }
+    #[test]
+    fn run_test_2() {
+        let mut input_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        input_path.push("resources/test1");
+        let result = puzzle2(&input_path);
+        assert_eq!(result, 51);
+    }
 }
