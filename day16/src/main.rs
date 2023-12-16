@@ -67,7 +67,7 @@ fn trace_beam(
     let mut queue = queue![];
     let _ = queue.add((pos, dir));
     while queue.size() > 0 {
-        log::info!("{:?}", queue);
+        log::trace!("{:?}", queue);
         let (cpost, cdir) = queue.remove().unwrap();
         // check_bounds retusn false if move would be bad
         if !check_bounds((map.len() as i64, map[0].len() as i64), cpost, cdir) {
@@ -78,7 +78,7 @@ fn trace_beam(
             dir: cdir,
         }
         .move_state();
-        log::info!("{:?} {:?} {:?}", cpos, cdir, queue);
+        log::trace!("{:?} {:?} {:?}", cpos, cdir, queue);
         if visited.contains(&(cpos, cdir)) {
             continue; // all possible paths explores from here
         }
