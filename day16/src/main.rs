@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 use common::{init_logs, read_lines};
@@ -18,7 +19,7 @@ fn main() {
     puzzle2(&input_path);
 }
 
-#[derive(PartialEq, Copy, Clone, Debug, Ord, Eq, PartialOrd)]
+#[derive(PartialEq, Copy, Clone, Debug, Ord, Eq, PartialOrd, Hash)]
 enum Direction {
     Right = 0,
     Up,
@@ -50,9 +51,10 @@ fn puzzle1(input_path: &Path) -> u64 {
         .map(|line| line.unwrap())
         .collect_vec();
 
-    let visited = Vec::new();
+    let visited = HashSet::new();
     let path = trace_beam(&input, (0, -1), Direction::Right, &visited);
     let ans = path.iter().map(|(pos, _dir)| pos).sorted().dedup().count();
+
     log::error!("{ans}");
     ans.try_into().unwrap()
 }
@@ -61,9 +63,9 @@ fn trace_beam(
     map: &[String],
     pos: Pos,
     dir: Direction,
-    visited: &[(Pos, Direction)],
-) -> Vec<(Pos, Direction)> {
-    let mut visited: Vec<(Pos, Direction)> = visited.iter().cloned().sorted().dedup().collect_vec();
+    visited: &HashSet<(Pos, Direction)>,
+) -> HashSet<(Pos, Direction)> {
+    let mut visited: HashSet<(Pos, Direction)> = visited.clone();
     let mut queue = queue![];
     let _ = queue.add((pos, dir));
     while queue.size() > 0 {
@@ -82,7 +84,7 @@ fn trace_beam(
         if visited.contains(&(cpos, cdir)) {
             continue; // all possible paths explores from here
         }
-        visited.push((cpos, cdir));
+        visited.insert((cpos, cdir));
         /*
         If the beam encounters empty space (.), it continues in the same direction.
         If the beam encounters a mirror (/ or \), the beam is reflected 90 degrees depending on the angle of the mirror. For instance, a rightward-moving beam that encounters a / mirror would continue upward in the mirror's column, while a rightward-moving beam that encounters a \ mirror would continue downward from the mirror's column.
@@ -168,7 +170,7 @@ fn puzzle2(input_path: &Path) -> u64 {
         .map(|line| line.unwrap())
         .collect_vec();
 
-    let visited = Vec::new();
+    let visited = HashSet::new();
     let mut paths = vec![];
 
     paths.par_extend((0..input.len()).into_par_iter().map(|i| {
