@@ -62,30 +62,12 @@ fn puzzle2(input_path: &Path) -> u128 {
             .map(|line| line.as_str())
             .collect_vec(),
     );
-    let parts = gen_parts();
-
-    let results = parts
-        .par_iter()
-        .map(|part| state_machine(part, &rules))
-        .filter(|out| out.1 == 'A')
-        .map(|out| out.0.iter().map(|catrat| catrat.1 as u128).sum::<u128>())
-        .sum();
+    let parts = std::array::from_fn(|_| (1..=4000).collect_vec());
+    log::debug!("{}", parts.len());
+    log::debug!("{}", parts[0].len());
+    let results = accepted(&rules, "in", parts);
     log::error!("{results}");
     results
-}
-
-fn gen_parts() -> Vec<Part> {
-    let mut parts = Vec::new();
-    for x in 1..=4000 {
-        for m in 1..=4000 {
-            for a in 1..=4000 {
-                for s in 1..=4000 {
-                    parts.push([('x', x), ('m', m), ('a', a), ('s', s)]);
-                }
-            }
-        }
-    }
-    parts
 }
 
 #[derive(Eq, PartialEq, PartialOrd, Ord, Debug)]
@@ -97,6 +79,8 @@ enum Rule<'a> {
 type RuleOutput = (Part, char);
 
 type Part = [(char, u16); 4];
+
+type RuleSet<'a> = HashMap<&'a str, Vec<Rule<'a>>>;
 
 fn get_rating(part: &Part, cat: char) -> u16 {
     match cat {
@@ -132,7 +116,7 @@ fn parse_parts(parts: &[&str]) -> Vec<Part> {
         .collect_vec()
 }
 
-fn build_rule_engine<'a>(rules: &[&'a str]) -> HashMap<&'a str, Vec<Rule<'a>>> {
+fn build_rule_engine<'a>(rules: &[&'a str]) -> RuleSet<'a> {
     let mut rulemap = HashMap::new();
     let rule_re = Regex::new(r"(?<cat>\w)(?<op><|>)(?<val>\d+):(?<next_rule>\w+)").unwrap();
     for ruleset in rules.iter() {
@@ -166,12 +150,12 @@ fn build_rule_engine<'a>(rules: &[&'a str]) -> HashMap<&'a str, Vec<Rule<'a>>> {
     rulemap
 }
 
-fn state_machine(part: &Part, rules: &HashMap<&str, Vec<Rule>>) -> RuleOutput {
+fn state_machine(part: &Part, rules: &RuleSet) -> RuleOutput {
     let mut cur_rule = rules.get("in").unwrap();
-    log::error!("{:?}", part);
+    log::trace!("{:?}", part);
     'outer: loop {
         for rule in cur_rule.iter() {
-            log::info!("{:?}", rule);
+            log::trace!("{:?}", rule);
             match rule {
                 Rule::Default(next_rule) => {
                     if *next_rule == "A" || *next_rule == "R" {
@@ -204,6 +188,42 @@ fn state_machine(part: &Part, rules: &HashMap<&str, Vec<Rule>>) -> RuleOutput {
             }
         }
     }
+}
+
+fn accepted(rules: &RuleSet, curr: &str, mut ranges: [Vec<u16>; 4]) -> u128 {
+    let mut result = 0;
+    let ruleset = &rules[curr];
+    log::debug!("range len {} x {}", ranges.len(), ranges[0].len());
+    for rule in ruleset.iter() {
+        log::debug!("{:?}", rule);
+        log::debug!("result {:?}", result);
+        match rule {
+            Rule::Default(def) if *def == "A" => {
+                return result + ranges.iter().map(|v| v.len() as u128).product::<u128>();
+            }
+            Rule::Default(def) if *def == "R" => {
+                return result;
+            }
+            Rule::Default(def) => {
+                return result + accepted(rules, def, ranges);
+            }
+            Rule::Condition(cat, op, val, next_rule) => {
+                let i = "xmas"
+                    .chars()
+                    .position(|c| c == cat.chars().next().unwrap())
+                    .unwrap();
+                let mut newranges = ranges.clone();
+                let val = val.parse().unwrap();
+                (newranges[i], ranges[i]) = ranges[i].iter().partition(|part| match *op {
+                    "<" => **part < val,
+                    ">" => **part > val,
+                    _ => panic!("invalid op"),
+                });
+                result += accepted(rules, next_rule, newranges);
+            }
+        }
+    }
+    result
 }
 
 #[cfg(test)]
