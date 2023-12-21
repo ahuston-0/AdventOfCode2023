@@ -201,15 +201,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "day18"
-version = "0.1.0"
-dependencies = [
- "common",
- "log",
- "simple_logger",
-]
-
-[[package]]
 name = "day19"
 version = "0.1.0"
 dependencies = [
@@ -225,6 +216,16 @@ dependencies = [
  "common",
  "log",
  "regex",
+ "simple_logger",
+]
+
+[[package]]
+name = "day20"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "log",
+ "queues",
  "simple_logger",
 ]
 

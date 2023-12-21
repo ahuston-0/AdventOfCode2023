@@ -2,3 +2,4 @@
 # removing inputs from git history, see statement from AoC creator below
 # https://twitter.com/ericwastl/status/1465805354214830081
 /**/input
+out.dot
